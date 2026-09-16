@@ -169,7 +169,7 @@ d8fff3ad796db2868d5d342727cc7fe6a160e28ae24aed5838e0175fd7c1efac  teamtype-x86_6
 d8b9ff78561100637bf180fd9101649b1a97c0d445850206c531e512983d16cd  teamtype
 ```
 
-These checksums are also published to the summary page of each [GitHub Actions run](actions/workflows/docker.yml). Because builds download assets fresh rather than using cached layers, any upstream replacement of assets can be verified against previous run records.
+These checksums are also published to the summary page of each [GitHub Actions run](https://github.com/watermelon1024/teamtype-docker/actions/workflows/docker.yml). Because builds download assets fresh rather than using cached layers, any upstream replacement of assets can be verified against previous run records.
 
 ## Tags
 
