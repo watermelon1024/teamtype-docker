@@ -4,28 +4,29 @@
 
 services:
   teamtype:
-    image: ghcr.io/watermelon1024/teamtype-docker:latest
+    image: ghcr.io/watermelon1024/teamtype-docker:${TEAMTYPE_TAG:-latest}
     # Uncomment to build locally instead of pulling from registry:
     # build:
     #   context: .
-    container_name: teamtype
+    container_name: ${TEAMTYPE_CONTAINER_NAME:-teamtype}
     restart: unless-stopped
 
     # Must match the owner of ./project on the host (image defaults to 1000:1000)
-    user: "1000:1000"
+    user: "${TEAMTYPE_UID:-1000}:${TEAMTYPE_GID:-1000}"
 
     volumes:
-      - ./project:/project
+      - "${TEAMTYPE_PROJECT_DIR:-./project}:/project"
 
     environment:
       # share = host a directory, join = connect to somebody else's directory
-      TEAMTYPE_COMMAND: share
-      TEAMTYPE_SHOW_SECRET_ADDRESS: "true"
-      TEAMTYPE_NO_JOIN_CODE: "false"
-      TEAMTYPE_USERNAME: cloud-peer
-      # TEAMTYPE_PEER: "<secret address>"           # only for TEAMTYPE_COMMAND=join
-      # TEAMTYPE_JOIN_CODE: "5-hamburger-endorse"    # one-time Magic Wormhole code
-      # TEAMTYPE_EXTRA_ARGS: "--iroh-relay https://relay.example.org"
+      TEAMTYPE_COMMAND: "${TEAMTYPE_COMMAND:-share}"
+      TEAMTYPE_SHOW_SECRET_ADDRESS: "${TEAMTYPE_SHOW_SECRET_ADDRESS:-true}"
+      TEAMTYPE_NO_JOIN_CODE: "${TEAMTYPE_NO_JOIN_CODE:-false}"
+      TEAMTYPE_USERNAME: "${TEAMTYPE_USERNAME:-cloud-peer}"
+      TEAMTYPE_PEER: "${TEAMTYPE_PEER:-}"
+      TEAMTYPE_JOIN_CODE: "${TEAMTYPE_JOIN_CODE:-}"
+      TEAMTYPE_SYNC_VCS: "${TEAMTYPE_SYNC_VCS:-false}"
+      TEAMTYPE_EXTRA_ARGS: "${TEAMTYPE_EXTRA_ARGS:-}"
 
     # Teamtype traverses NAT via iroh; host networking gives direct peer connections (Linux only)
     # network_mode: host

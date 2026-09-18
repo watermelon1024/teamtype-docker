@@ -34,9 +34,10 @@ docker run -d --name teamtype \
   ghcr.io/watermelon1024/teamtype-docker:latest
 ```
 
-Or with Compose — copy [docker-compose.yml](docker-compose.yml) and run:
+Or with Compose — copy [docker-compose.yml](docker-compose.yml) (and optional [.env.example](.env.example)):
 
 ```bash
+cp .env.example .env   # optional: customize UID, paths, or settings
 docker compose up -d
 docker compose logs -f
 ```
@@ -81,16 +82,30 @@ Files sync automatically on disk, but you can install a [Teamtype editor plugin]
 
 The shared directory inside the container is always `/project` — mount it wherever you like on the host. All settings below are optional; the defaults run a `share` daemon.
 
+When using Docker Compose, settings can be configured via a `.env` file (see [.env.example](.env.example)) or passed as environment variables.
+
+### Teamtype settings
+
 | Variable | Default | Description |
 | --- | --- | --- |
 | `TEAMTYPE_COMMAND` | `share` | `share` to host a directory, `join` to connect to somebody else's. |
 | `TEAMTYPE_SHOW_SECRET_ADDRESS` | `true` | Print the secret address on startup (`share` only). |
 | `TEAMTYPE_NO_JOIN_CODE` | `false` | Skip the one-time Magic Wormhole join code (`share` only). |
-| `TEAMTYPE_USERNAME` | unset | Name shown next to this peer's cursor. Falls back to the Git username, then `Anonymous`. |
+| `TEAMTYPE_USERNAME` | `cloud-peer` (Compose) / unset (CLI) | Name shown next to this peer's cursor. Falls back to the Git username, then `Anonymous`. |
 | `TEAMTYPE_PEER` | unset | Secret address to connect to. Appended to `.teamtype/config` if no `peer` is configured yet. |
 | `TEAMTYPE_JOIN_CODE` | unset | One-time join code, used when `TEAMTYPE_COMMAND=join`. |
 | `TEAMTYPE_SYNC_VCS` | `false` | Experimental: also synchronise `.git/` and `.jj/`. |
 | `TEAMTYPE_EXTRA_ARGS` | unset | Extra flags appended verbatim, e.g. `--iroh-relay https://relay.example.org`. |
+
+### Compose-specific variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `TEAMTYPE_UID` | `1000` | Host user UID running the container. |
+| `TEAMTYPE_GID` | `1000` | Host user GID running the container. |
+| `TEAMTYPE_PROJECT_DIR` | `./project` | Host directory to bind-mount to `/project`. |
+| `TEAMTYPE_TAG` | `latest` | Container image tag to pull. |
+| `TEAMTYPE_CONTAINER_NAME` | `teamtype` | Name of the created container. |
 
 Anything you pass after the image name replaces the generated command line, so the CLI stays reachable:
 
@@ -106,9 +121,17 @@ Settings that have no CLI flag (custom relays, `emit_*` toggles) go into `projec
 
 The container runs as uid/gid `1000` by default and needs read/write access to the mounted directory. Either `chown 1000:1000` the host directory, or set the container user to match your host UID:
 
-```yaml
-user: "1001:1001"   # docker-compose.yml, or --user $(id -u):$(id -g)
-```
+- **Docker Compose:** Set `TEAMTYPE_UID` and `TEAMTYPE_GID` in `.env`, or run inline:
+
+  ```bash
+  TEAMTYPE_UID=$(id -u) TEAMTYPE_GID=$(id -g) docker compose up -d
+  ```
+
+- **Docker CLI:** Pass `--user`:
+
+  ```bash
+  docker run -d --user "$(id -u):$(id -g)" ...
+  ```
 
 The entrypoint creates `/project/.teamtype/` and sets it to mode `700` before starting the daemon. Both steps are required: Teamtype asks an interactive yes/no question when the directory is missing (impossible in a container), and refuses to start when group or others have any access to the directory holding its editor socket.
 

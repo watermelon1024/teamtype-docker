@@ -1,0 +1,9 @@
+# Environment configuration
+.env
+
+# Shared project directory created by quick start
+project/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
